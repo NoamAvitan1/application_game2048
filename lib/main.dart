@@ -283,7 +283,7 @@ class _MyHomePageState extends State<MyHomePage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your App Title'),
+        title: const Text(''),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -292,12 +292,29 @@ class _MyHomePageState extends State<MyHomePage>
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Container(
-                padding: const EdgeInsets.all(20),
-                color: const Color.fromARGB(255, 127, 125, 120),
-                child: Text(
-                  score.toString(),
-                  style: const TextStyle(
-                    color: Colors.white,
+                padding: const EdgeInsets.all(15),
+                color: const Color.fromARGB(255, 89, 161, 223),
+                child: const Text(
+                  '2048',
+                  style: TextStyle(color: Colors.white, fontSize: 30),
+                ),
+              ),
+              Container(
+                width: 100,
+                color: const Color.fromARGB(255, 142, 155, 166),
+                child: Padding(
+                  padding: const EdgeInsets.all(0),
+                  child: Column(
+                    children: [
+                      const Text(
+                        'score',
+                        style: TextStyle(color: Colors.white, fontSize: 24),
+                      ),
+                      Text(
+                        score.toString(),
+                        style: const TextStyle(color: Colors.white, fontSize: 30),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -310,64 +327,83 @@ class _MyHomePageState extends State<MyHomePage>
           const SizedBox(
             height: 100,
           ),
-          Container(
-            color: const Color.fromARGB(255, 142, 155, 166),
-            height: 420,
-            child: Stack(
-              children: [
-                GridView.builder(
-                  itemCount: board.length * board[0].length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: board[0].length,
-                  ),
-                  itemBuilder: (BuildContext context, int index) {
-                    int row = index ~/ board[0].length;
-                    int col = index % board[0].length;
-                    return Container(
-                      color: board[row][col] == 0
-                          ? const Color.fromARGB(255, 170, 182, 191)
-                          : HSLColor.fromAHSL(
-                                  1.0, (board[row][col] * 10) % 360, 0.7, 0.5)
-                              .toColor(),
-                      margin: const EdgeInsets.all(8),
-                      alignment: Alignment.center,
-                      child: Text(
-                        '${board[row][col]}',
-                        style: board[row][col] == 0
-                            ? const TextStyle(
-                                color: Color.fromARGB(255, 170, 182, 191))
-                            : const TextStyle(
-                                color: Colors.white, fontSize: 28),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              color: const Color.fromARGB(255, 142, 155, 166),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final boxSize = constraints.maxWidth / board[0].length;
+                  final gridHeight = boxSize * board.length;
+                  return Stack(
+                    children: [
+                      Container(
+                        height: gridHeight,
+                        child: GridView.builder(
+                          itemCount: board.length * board[0].length,
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: board[0].length,
+                            childAspectRatio:
+                                1, // Maintain aspect ratio for each box
+                          ),
+                          itemBuilder: (BuildContext context, int index) {
+                            int row = index ~/ board[0].length;
+                            int col = index % board[0].length;
+                            return Container(
+                              height: boxSize,
+                              color: board[row][col] == 0
+                                  ? const Color.fromARGB(255, 170, 182, 191)
+                                  : HSLColor.fromAHSL(
+                                          1.0,
+                                          (board[row][col] * 10) % 360,
+                                          0.7,
+                                          0.5)
+                                      .toColor(),
+                              margin: const EdgeInsets.all(10),
+                              alignment: Alignment.center,
+                              child: Text(
+                                '${board[row][col]}',
+                                style: board[row][col] == 0
+                                    ? const TextStyle(
+                                        color:
+                                            Color.fromARGB(255, 170, 182, 191))
+                                    : const TextStyle(
+                                        color: Colors.white, fontSize: 28),
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                    );
-                  },
-                ),
-                Positioned.fill(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onVerticalDragEnd: (details) {
-                      if (details.primaryVelocity != 0) {
-                        if (details.primaryVelocity! > 0) {
-                          moveDown();
-                        } else {
-                          moveUp();
-                        }
-                        if (isSoundEnabled) playSound();
-                      }
-                    },
-                    onHorizontalDragEnd: (details) {
-                      if (details.primaryVelocity != 0) {
-                        if (details.primaryVelocity! > 0) {
-                          moveRight();
-                        } else {
-                          moveLeft();
-                        }
-                        if (isSoundEnabled) playSound();
-                      }
-                    },
-                  ),
-                ),
-              ],
+                      Positioned.fill(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onVerticalDragEnd: (details) {
+                            if (details.primaryVelocity != 0) {
+                              if (details.primaryVelocity! > 0) {
+                                moveDown();
+                              } else {
+                                moveUp();
+                              }
+                              if (isSoundEnabled) playSound();
+                            }
+                          },
+                          onHorizontalDragEnd: (details) {
+                            if (details.primaryVelocity != 0) {
+                              if (details.primaryVelocity! > 0) {
+                                moveRight();
+                              } else {
+                                moveLeft();
+                              }
+                              if (isSoundEnabled) playSound();
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ],
