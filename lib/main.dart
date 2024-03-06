@@ -283,7 +283,17 @@ class _MyHomePageState extends State<MyHomePage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(''),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            IconButton(
+              onPressed: () => toggleSound(),
+              icon: isSoundEnabled
+                  ? const Icon(Icons.volume_up_outlined)
+                  : const Icon(Icons.volume_off_outlined),
+            ),
+          ],
+        ),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -291,36 +301,75 @@ class _MyHomePageState extends State<MyHomePage>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Container(
-                padding: const EdgeInsets.all(15),
-                color: const Color.fromARGB(255, 89, 161, 223),
-                child: const Text(
-                  '2048',
-                  style: TextStyle(color: Colors.white, fontSize: 30),
-                ),
-              ),
-              Container(
+              SizedBox(
                 width: 100,
-                color: const Color.fromARGB(255, 142, 155, 166),
-                child: Padding(
-                  padding: const EdgeInsets.all(0),
-                  child: Column(
-                    children: [
-                      const Text(
-                        'score',
-                        style: TextStyle(color: Colors.white, fontSize: 24),
-                      ),
-                      Text(
-                        score.toString(),
-                        style: const TextStyle(color: Colors.white, fontSize: 30),
-                      ),
-                    ],
+                height: 95,
+                child: Container(
+                  padding: const EdgeInsets.all(15),
+                  color: const Color.fromARGB(255, 89, 161, 223),
+                  child: const Center(
+                    child: Text(
+                      '2048',
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                    ),
                   ),
                 ),
               ),
-              ElevatedButton(
-                onPressed: () => reset(),
-                child: const Text('reset'),
+              SizedBox(
+                width: 100,
+                height: 95,
+                child: Container(
+                  color: const Color.fromARGB(255, 142, 155, 166),
+                  child: Padding(
+                    padding: const EdgeInsets.all(2),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'score',
+                          style: TextStyle(color: Colors.white, fontSize: 20),
+                        ),
+                        Text(
+                          score.toString(),
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 22),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 100,
+                height: 95,
+                child: ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                      const Color.fromARGB(255, 142, 155, 166),
+                    ),
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(0),
+                      ),
+                    ),
+                  ),
+                  onPressed: () => reset(),
+                  child: const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'New',
+                          style: TextStyle(color: Color.fromARGB(255, 246, 243, 243), fontSize: 15),
+                        ),
+                        Text(
+                          'Game',
+                          style: TextStyle(color: Color.fromARGB(255, 246, 243, 243), fontSize: 15),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
@@ -355,11 +404,11 @@ class _MyHomePageState extends State<MyHomePage>
                               color: board[row][col] == 0
                                   ? const Color.fromARGB(255, 170, 182, 191)
                                   : HSLColor.fromAHSL(
-                                          1.0,
-                                          (board[row][col] * 10) % 360,
-                                          0.7,
-                                          0.5)
-                                      .toColor(),
+                                      1.0,
+                                      (board[row][col] * 10) % 360,
+                                      0.7,
+                                      0.5,
+                                    ).toColor(),
                               margin: const EdgeInsets.all(10),
                               alignment: Alignment.center,
                               child: Text(
