@@ -2,6 +2,8 @@
 
 A new Flutter project.
 
+This project was made by Noam Avitan.
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.

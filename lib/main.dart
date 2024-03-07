@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: ''),
+      home: const MyHomePage(),
     );
   }
 }
@@ -31,8 +31,7 @@ class MyObject {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-  final String title;
+  const MyHomePage({Key? key}) : super(key: key);
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -41,12 +40,11 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
   List<List<int>> board = List.generate(4, (_) => List.filled(4, 0));
-  bool isMoving = false;
   bool failed = false;
   int score = 0;
+  bool isWinner = false;
   bool isSoundEnabled = true;
   // late AnimationController _controller;
-  final player = AudioPlayer();
 
   @override
   void initState() {
@@ -65,9 +63,9 @@ class _MyHomePageState extends State<MyHomePage>
     });
   }
 
-  Future<void> playSound() async {
-    String audioPath = "audio/Air-gun-sound-effect.mp3";
-    await player.play(AssetSource(audioPath));
+  Future<void> playSound(String path) async {
+    AudioPlayer currentPlayer = AudioPlayer();
+    await currentPlayer.play(AssetSource(path));
   }
 
   void highestScore() {
@@ -120,7 +118,15 @@ class _MyHomePageState extends State<MyHomePage>
 
   bool checkWinner() {
     for (int i = 0; i < 4; i++) {
-      if (board[i].contains(2048)) return true;
+      if (board[i].contains(2048)) {
+        setState(() {
+          score = 2048;
+        });
+        setState(() {
+          isWinner = true;
+        });
+        return true;
+      }
     }
     return false;
   }
@@ -139,6 +145,11 @@ class _MyHomePageState extends State<MyHomePage>
         }
       }
     }
+    if (flag) {
+      setState(() {
+        failed = true;
+      });
+    }
     return flag;
   }
 
@@ -148,10 +159,14 @@ class _MyHomePageState extends State<MyHomePage>
         board[i][j] = 0;
       }
     }
+    setState(() {
+      failed = false;
+    });
     fillCells(empty: true);
   }
 
   void moveRight() {
+    if (failed || isWinner) return;
     List<List<int>> newArr = [];
     for (int d = 0; d < 4; d++) {
       var arr = board[d];
@@ -176,13 +191,15 @@ class _MyHomePageState extends State<MyHomePage>
     setState(() {
       board = newArr;
     });
+    if (checkWinner()) return;
     if (checkFailed()) {
-      print('failed');
+      playSound("audio/Game-over-ident.mp3");
     }
     fillCells(empty: false);
   }
 
   void moveLeft() {
+    if (failed || isWinner) return;
     List<List<int>> newArr = [];
     for (int d = 0; d < 4; d++) {
       var arr = board[d];
@@ -209,13 +226,15 @@ class _MyHomePageState extends State<MyHomePage>
     setState(() {
       board = newArr;
     });
+    if (checkWinner()) return;
     if (checkFailed()) {
-      print('failed');
+      playSound("audio/Game-over-ident.mp3");
     }
     fillCells(empty: false);
   }
 
   void moveDown() {
+    if (failed || isWinner) return;
     var arr = [...board];
     int index;
     for (int i = 0; i < 4; i++) {
@@ -238,13 +257,15 @@ class _MyHomePageState extends State<MyHomePage>
     setState(() {
       board = arr;
     });
+    if (checkWinner()) return;
     if (checkFailed()) {
-      print('failed');
+      playSound("audio/Game-over-ident.mp3");
     }
     fillCells(empty: false);
   }
 
   void moveUp() {
+    if (failed || isWinner) return;
     var arr = [...board];
     int index;
     for (int i = 0; i < 4; i++) {
@@ -269,14 +290,11 @@ class _MyHomePageState extends State<MyHomePage>
     setState(() {
       board = arr;
     });
+    if (checkWinner()) return;
     if (checkFailed()) {
-      print('failed');
+      playSound("audio/Game-over-ident.mp3");
     }
     fillCells(empty: false);
-  }
-
-  void onPressed() {
-    print("d");
   }
 
   @override
@@ -289,173 +307,185 @@ class _MyHomePageState extends State<MyHomePage>
             IconButton(
               onPressed: () => toggleSound(),
               icon: isSoundEnabled
-                  ? const Icon(Icons.volume_up_outlined)
-                  : const Icon(Icons.volume_off_outlined),
+                  ? const Icon(
+                      Icons.volume_up_outlined,
+                      size: 30,
+                    )
+                  : const Icon(Icons.volume_off_outlined, size: 30),
             ),
           ],
         ),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              SizedBox(
-                width: 100,
-                height: 95,
-                child: Container(
-                  padding: const EdgeInsets.all(15),
-                  color: const Color.fromARGB(255, 89, 161, 223),
-                  child: const Center(
-                    child: Text(
-                      '2048',
-                      style: TextStyle(color: Colors.white, fontSize: 20),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(
-                width: 100,
-                height: 95,
-                child: Container(
-                  color: const Color.fromARGB(255, 142, 155, 166),
-                  child: Padding(
-                    padding: const EdgeInsets.all(2),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'score',
-                          style: TextStyle(color: Colors.white, fontSize: 20),
-                        ),
-                        Text(
-                          score.toString(),
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 22),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(
-                width: 100,
-                height: 95,
-                child: ElevatedButton(
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(
-                      const Color.fromARGB(255, 142, 155, 166),
-                    ),
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(0),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                SizedBox(
+                  width: 100,
+                  height: 95,
+                  child: Container(
+                    padding: const EdgeInsets.all(15),
+                    color: const Color.fromARGB(255, 89, 161, 223),
+                    child: const Center(
+                      child: Text(
+                        '2048',
+                        style: TextStyle(color: Colors.white, fontSize: 20),
                       ),
                     ),
                   ),
-                  onPressed: () => reset(),
-                  child: const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'New',
-                          style: TextStyle(color: Color.fromARGB(255, 246, 243, 243), fontSize: 15),
-                        ),
-                        Text(
-                          'Game',
-                          style: TextStyle(color: Color.fromARGB(255, 246, 243, 243), fontSize: 15),
-                        ),
-                      ],
-                    ),
-                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(
-            height: 100,
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-              color: const Color.fromARGB(255, 142, 155, 166),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final boxSize = constraints.maxWidth / board[0].length;
-                  final gridHeight = boxSize * board.length;
-                  return Stack(
-                    children: [
-                      Container(
-                        height: gridHeight,
-                        child: GridView.builder(
-                          itemCount: board.length * board[0].length,
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: board[0].length,
-                            childAspectRatio:
-                                1, // Maintain aspect ratio for each box
+                SizedBox(
+                  width: 100,
+                  height: 95,
+                  child: Container(
+                    color: const Color.fromARGB(255, 142, 155, 166),
+                    child: Padding(
+                      padding: const EdgeInsets.all(2),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'score',
+                            style: TextStyle(color: Colors.white, fontSize: 20),
                           ),
-                          itemBuilder: (BuildContext context, int index) {
-                            int row = index ~/ board[0].length;
-                            int col = index % board[0].length;
-                            return Container(
-                              height: boxSize,
-                              color: board[row][col] == 0
-                                  ? const Color.fromARGB(255, 170, 182, 191)
-                                  : HSLColor.fromAHSL(
-                                      1.0,
-                                      (board[row][col] * 10) % 360,
-                                      0.7,
-                                      0.5,
-                                    ).toColor(),
-                              margin: const EdgeInsets.all(10),
-                              alignment: Alignment.center,
-                              child: Text(
-                                '${board[row][col]}',
-                                style: board[row][col] == 0
-                                    ? const TextStyle(
-                                        color:
-                                            Color.fromARGB(255, 170, 182, 191))
-                                    : const TextStyle(
-                                        color: Colors.white, fontSize: 28),
-                              ),
-                            );
-                          },
+                          Text(
+                            score.toString(),
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 22),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 100,
+                  height: 95,
+                  child: ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                        const Color.fromARGB(255, 142, 155, 166),
+                      ),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(0),
                         ),
                       ),
-                      Positioned.fill(
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.translucent,
-                          onVerticalDragEnd: (details) {
-                            if (details.primaryVelocity != 0) {
-                              if (details.primaryVelocity! > 0) {
-                                moveDown();
-                              } else {
-                                moveUp();
-                              }
-                              if (isSoundEnabled) playSound();
-                            }
-                          },
-                          onHorizontalDragEnd: (details) {
-                            if (details.primaryVelocity != 0) {
-                              if (details.primaryVelocity! > 0) {
-                                moveRight();
-                              } else {
-                                moveLeft();
-                              }
-                              if (isSoundEnabled) playSound();
-                            }
-                          },
-                        ),
+                    ),
+                    onPressed: () => reset(),
+                    child: const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'New',
+                            style: TextStyle(
+                                color: Color.fromARGB(255, 246, 243, 243),
+                                fontSize: 15),
+                          ),
+                          Text(
+                            'Game',
+                            style: TextStyle(
+                                color: Color.fromARGB(255, 246, 243, 243),
+                                fontSize: 15),
+                          ),
+                        ],
                       ),
-                    ],
-                  );
-                },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 100,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                color: const Color.fromARGB(255, 142, 155, 166),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final boxSize = constraints.maxWidth / board[0].length;
+                    final gridHeight = boxSize * board.length;
+                    return Stack(
+                      children: [
+                        Container(
+                          height: gridHeight,
+                          child: GridView.builder(
+                            itemCount: board.length * board[0].length,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: board[0].length,
+                              childAspectRatio: 1,
+                            ),
+                            itemBuilder: (BuildContext context, int index) {
+                              int row = index ~/ board[0].length;
+                              int col = index % board[0].length;
+                              return Container(
+                                height: boxSize,
+                                color: board[row][col] == 0
+                                    ? const Color.fromARGB(255, 170, 182, 191)
+                                    : HSLColor.fromAHSL(
+                                        1.0,
+                                        (board[row][col] * 10) % 360,
+                                        0.7,
+                                        0.5,
+                                      ).toColor(),
+                                margin: const EdgeInsets.all(10),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  '${board[row][col]}',
+                                  style: board[row][col] == 0
+                                      ? const TextStyle(
+                                          color: Color.fromARGB(
+                                              255, 170, 182, 191))
+                                      : const TextStyle(
+                                          color: Colors.white, fontSize: 28),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        Positioned.fill(
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onVerticalDragEnd: (details) {
+                              if (details.primaryVelocity != 0) {
+                                if (details.primaryVelocity! > 0) {
+                                  moveDown();
+                                } else {
+                                  moveUp();
+                                }
+                                if (isSoundEnabled && !failed) {
+                                  playSound("audio/Air-gun-sound-effect.mp3");
+                                }
+                              }
+                            },
+                            onHorizontalDragEnd: (details) {
+                              if (details.primaryVelocity != 0) {
+                                if (details.primaryVelocity! > 0) {
+                                  moveRight();
+                                } else {
+                                  moveLeft();
+                                }
+                                if (isSoundEnabled && !failed) {
+                                  playSound("audio/Air-gun-sound-effect.mp3");
+                                }
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
