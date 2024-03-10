@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -44,6 +45,7 @@ class _MyHomePageState extends State<MyHomePage>
   int score = 0;
   bool isWinner = false;
   bool isSoundEnabled = true;
+  late ConfettiController _controllerTopCenter;
   // late AnimationController _controller;
 
   @override
@@ -53,8 +55,16 @@ class _MyHomePageState extends State<MyHomePage>
     //   vsync: this,
     //   duration: const Duration(milliseconds: 9000),
     // );
+    _controllerTopCenter =
+        ConfettiController(duration: const Duration(seconds: 10));
     highestScore();
     fillCells(empty: true);
+  }
+
+  @override
+  void dispose() {
+    _controllerTopCenter.dispose();
+    super.dispose();
   }
 
   void toggleSound() {
@@ -121,10 +131,10 @@ class _MyHomePageState extends State<MyHomePage>
       if (board[i].contains(2048)) {
         setState(() {
           score = 2048;
-        });
-        setState(() {
           isWinner = true;
         });
+        playSound("audio/Game-show-winning.mp3");
+        _controllerTopCenter.play();
         return true;
       }
     }
@@ -476,6 +486,18 @@ class _MyHomePageState extends State<MyHomePage>
                                 }
                               }
                             },
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.topCenter,
+                          child: ConfettiWidget(
+                            confettiController: _controllerTopCenter,
+                            blastDirection: pi / 2,
+                            maxBlastForce: 5,
+                            minBlastForce: 2,
+                            emissionFrequency: 0.05,
+                            numberOfParticles: 50,
+                            gravity: 1,
                           ),
                         ),
                       ],

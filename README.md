@@ -2,7 +2,7 @@
 
 A new Flutter project.
 
-This project was made by Noam Avitan.
+This application was made by Noam Avitan.
 
 ## Getting Started
 
