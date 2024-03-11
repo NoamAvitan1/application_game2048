@@ -33,22 +33,22 @@ class _IntroductionPageState extends State<IntroductionPage> {
             children: const [
                AnimatedPage(
                 color: Colors.red,
-                text: 'images/right.png',
+                text: "assets/images/right.png",
                 direction: AxisDirection.right,
               ),
               AnimatedPage(
                 color: Colors.blue,
-                text: 'images/left.png',
+                text: "assets/images/left.png",
                 direction: AxisDirection.left,
               ),
               AnimatedPage(
                 color: Colors.green,
-                text: 'images/up.png',
+                text: "assets/images/up.png",
                 direction: AxisDirection.up,
               ),
               AnimatedPage(
                 color: Colors.orange,
-                text: 'images/down.png',
+                text: "assets/images/down.png",
                 direction: AxisDirection.down,
               ),
             ],
@@ -101,10 +101,7 @@ class AnimatedPage extends StatelessWidget {
              Expanded(
               child: Padding(
                 padding:  const EdgeInsets.all(16.0), 
-                child: Image(
-                  image: AssetImage(text),
-                  fit: BoxFit.contain, 
-                ),
+                child: Image.asset(text, fit: BoxFit.contain)
               ),
             ),
           ],
